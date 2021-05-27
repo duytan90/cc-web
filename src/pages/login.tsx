@@ -1,20 +1,13 @@
 import React from "react";
 import { Formik, Form } from "formik";
-import {
-  FormControl,
-  FormLabel,
-  Input,
-  FormErrorMessage,
-  Box,
-  Button
-} from "@chakra-ui/react";
+import { Link, Box, Button, Flex } from "@chakra-ui/react";
 import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
 import { loginFields } from "./FieldConfig";
-import { useMutation } from "urql";
 import { useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
+import NextLink from "next/link";
 
 interface registerProps {}
 
@@ -25,9 +18,12 @@ const Login: React.FC<registerProps> = ({}) => {
   return (
     <Wrapper variant="small">
       <Formik
-        initialValues={{ username: "", password: "" }}
+        initialValues={{ usernameOrEmail: "", password: "" }}
         onSubmit={async (values, actions) => {
-          const response = await login({ options: values });
+          const response = await login({
+            usernameOrEmail: values.usernameOrEmail,
+            password: values.password,
+          });
           if (response.data?.login.errors) {
             actions.setErrors(toErrorMap(response.data.login.errors));
           } else if (response.data?.login.user) {
@@ -35,7 +31,7 @@ const Login: React.FC<registerProps> = ({}) => {
           }
         }}
       >
-        {({ values, handleChange, isSubmitting }) => (
+        {({ isSubmitting }) => (
           <Form>
             {loginFields.map((field, idx) => (
               <Box key={idx} mt={4}>
@@ -47,6 +43,13 @@ const Login: React.FC<registerProps> = ({}) => {
                 />
               </Box>
             ))}
+
+            <Flex>
+              <NextLink href="/forgot-password">
+                <Link ml='auto' pt={1}>Forgot password?</Link>
+              </NextLink>
+            </Flex>
+
             <Button
               mt={4}
               isLoading={isSubmitting}
