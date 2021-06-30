@@ -1,51 +1,67 @@
-import React from "react";
-import { Box, Flex, Link, Button } from "@chakra-ui/react";
-import NextLink from "next/link";
-import { useMeQuery, useLogoutMutation } from "../generated/graphql";
-import { isServer } from "../utils/isServer";
+import React from 'react'
+import { Box, Flex, Heading, Button, Link } from '@chakra-ui/react'
+import NextLink from 'next/link'
+import { useMeQuery, useLogoutMutation } from '../generated/graphql'
+import { isServer } from '../utils/isServer'
+import { useRouter } from 'next/router'
 
 interface NavBarProps {
-  variant?: "small" | "regular";
+  variant?: 'small' | 'regular'
 }
 
-const userInfo = () => {
-  const [{ fetching: queryMeFetching, data }] = useMeQuery({
-    pause: isServer() // Stop send un-nessessary request to server
-  });
-  const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
+const renderUserInfo = () => {
+  const [{ fetching: queryMeFetching, data: meData }] = useMeQuery({
+    pause: isServer(), // Stop send un-nessessary request to server
+  })
+  const [{ fetching: logoutFetching }, logout] = useLogoutMutation()
+  const router = useRouter()
 
-  if (data?.me) {
+  if (meData?.me) {
     return (
       <Flex>
-        <Box>{data.me.username}</Box>
+        <Button>{meData?.me?.username}</Button>
         <Button
-          onClick={() => logout()}
-          variant="link"
+          onClick={async () => {
+            await logout()
+            router.reload()
+          }}
           isLoading={logoutFetching}
           ml={5}
         >
           Logout
         </Button>
       </Flex>
-    );
+    )
   }
 
   return (
     <Flex>
-      <NextLink href="/login">
-        <Link p={2}>Login</Link>
+      <NextLink href='/login'>
+        <Button>Login</Button>
       </NextLink>
-      <NextLink href="/register">
-        <Link p={2}>Register</Link>
+      <NextLink href='/register'>
+        <Button>Register</Button>
       </NextLink>
     </Flex>
-  );
-};
+  )
+}
 
 export const NavBar: React.FC<NavBarProps> = () => {
   return (
-    <Flex p={4} bg="transparent">
-      <Box ml={"auto"}>{userInfo()}</Box>
+    <Flex
+      p={4}
+      bg='transparent'
+      position='sticky'
+      top={0}
+      zIndex={1}
+      align='center'
+    >
+      <NextLink href='/'>
+        <Link>
+          <Heading>CAICHO</Heading>
+        </Link>
+      </NextLink>
+      <Box ml={'auto'}>{renderUserInfo()}</Box>
     </Flex>
-  );
-};
+  )
+}

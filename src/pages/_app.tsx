@@ -1,7 +1,7 @@
-import { ChakraProvider, ColorModeProvider } from "@chakra-ui/react";
-import theme from "../theme";
-import { createUrlqClient } from "../utils/createUrqlClient";
-import { withUrqlClient } from "next-urql";
+import { ChakraProvider, ColorModeProvider } from '@chakra-ui/react'
+import theme from '../theme'
+import { createUrlqClient } from '../utils/createUrqlClient'
+import { withUrqlClient } from 'next-urql'
 
 function MyApp({ Component, pageProps }: any) {
   return (
@@ -9,13 +9,14 @@ function MyApp({ Component, pageProps }: any) {
       <ColorModeProvider
         options={{
           useSystemColorMode: true,
-          initialColorMode: "dark"
+          initialColorMode: 'dark',
         }}
       >
         <Component {...pageProps} />
       </ColorModeProvider>
     </ChakraProvider>
-  );
+  )
 }
 
-export default withUrqlClient(createUrlqClient)(MyApp);
+// Set ssr to false to switch to client side rendering
+export default withUrqlClient(createUrlqClient, { ssr: false })(MyApp)

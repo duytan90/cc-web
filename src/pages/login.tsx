@@ -1,33 +1,48 @@
-import React from "react";
-import { Formik, Form } from "formik";
-import { Link, Box, Button, Flex } from "@chakra-ui/react";
-import { Wrapper } from "../components/Wrapper";
-import { InputField } from "../components/InputField";
-import { loginFields } from "./FieldConfig";
-import { useLoginMutation } from "../generated/graphql";
-import { toErrorMap } from "../utils/toErrorMap";
-import { useRouter } from "next/router";
-import NextLink from "next/link";
+import React from 'react'
+import { Formik, Form } from 'formik'
+import { Link, Box, Button, Flex } from '@chakra-ui/react'
+import { Wrapper } from '../components/Wrapper'
+import { InputField } from '../components/InputField'
+import { loginFields } from './FieldConfig'
+import { useLoginMutation, useUsersQuery } from '../generated/graphql'
+import { toErrorMap } from '../utils/toErrorMap'
+import { useRouter } from 'next/router'
+import NextLink from 'next/link'
+import { Layout } from '../components/Layout'
 
 interface registerProps {}
 
 const Login: React.FC<registerProps> = ({}) => {
-  const router = useRouter();
-  const [, login] = useLoginMutation();
+  const router = useRouter()
+  const [, login] = useLoginMutation()
+
+  const getAllUser = async () => {
+    const [{ fetching, data }, getAllUsers] = useUsersQuery()
+    getAllUsers()
+    console.log(`all uses: `, data)
+  }
 
   return (
-    <Wrapper variant="small">
+    <Layout variant='small'>
+      <Button mt={10} mb={10} onClick={() => getAllUser()}>
+        Console log all users
+      </Button>
+
       <Formik
-        initialValues={{ usernameOrEmail: "", password: "" }}
+        initialValues={{ usernameOrEmail: '', password: '' }}
         onSubmit={async (values, actions) => {
           const response = await login({
             usernameOrEmail: values.usernameOrEmail,
             password: values.password,
-          });
+          })
           if (response.data?.login.errors) {
-            actions.setErrors(toErrorMap(response.data.login.errors));
+            actions.setErrors(toErrorMap(response.data.login.errors))
           } else if (response.data?.login.user) {
-            router.push("/");
+            if (typeof router.query.next === 'string') {
+              router.push(router.query.next)
+            } else {
+              router.push('/')
+            }
           }
         }}
       >
@@ -45,24 +60,26 @@ const Login: React.FC<registerProps> = ({}) => {
             ))}
 
             <Flex>
-              <NextLink href="/forgot-password">
-                <Link ml='auto' pt={1}>Forgot password?</Link>
+              <NextLink href='/forgot-password'>
+                <Link ml='auto' pt={1}>
+                  Forgot password?
+                </Link>
               </NextLink>
             </Flex>
 
             <Button
               mt={4}
               isLoading={isSubmitting}
-              type="submit"
-              colorScheme="telegram"
+              type='submit'
+              colorScheme='telegram'
             >
               Login
             </Button>
           </Form>
         )}
       </Formik>
-    </Wrapper>
-  );
-};
+    </Layout>
+  )
+}
 
-export default Login;
+export default Login
